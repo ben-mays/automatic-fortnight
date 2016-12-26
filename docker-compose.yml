@@ -1,0 +1,7 @@
+services:
+  fortnight:
+    build:
+      context: .
+    image: fortnight
+    ports:
+      - "9090:9090"
