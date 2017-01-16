@@ -9,9 +9,9 @@ COPY project.clj /usr/src/app/
 RUN lein deps
 
 COPY . /usr/src/app
-RUN mv "$(lein uberjar | sed -n 's/^Created \(.*standalone\.jar\)/\1/p')" {{ name }}.jar
+RUN mv "$(lein uberjar | sed -n 's/^Created \(.*standalone\.jar\)/\1/p')" fortnight.jar
 
-EXPOSE 8080
+EXPOSE 9090
 
-ENTRYPOINT ["java", "-jar", "{{ name }}.jar"]
+ENTRYPOINT ["java", "-jar", "fortnight.jar"]
 CMD ["start"]

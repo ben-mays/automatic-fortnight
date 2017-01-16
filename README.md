@@ -1,6 +1,6 @@
 # automatic-fortnight
 
-The Fortnight service is a simple event multiplexing system that exposes a two interfaces; one for `event source` clients and another for `user` clients. I was sent the project description days before I was on holiday and just recently had some bandwidth to tackle it. On my return flight in January, I began working on it. I've chosen to use no external libraries (even core.async) with the exception of `log4j` and `cprop` for logging and configuration.
+The Fortnight service is a simple event multiplexing system that exposes a two interfaces; one for `event source` clients and another for `user` clients. I was sent the project description days before I was on holiday and just recently had some bandwidth to tackle it. On my return flight in January, I began working on it. I've chosen to use no external libraries (even core.async) with the exception of `clojure.tools.logging` and `cprop` for logging and configuration.
 
 ## Usage
 
@@ -13,7 +13,20 @@ The system exposes the following options:
 * Max Delay (if -1 wait forever)
 
 ### Docker
-## 
+
+I decided to dockerize the service for ease of deployment - the docker container will abstract away the environment. Optionally, I've incuded a jar you can run under `bin`.
+
+* Install (docker-compose)[https://docs.docker.com/compose/install/] (and docker) on your system.
+* Clone the repo
+* Launch the server with `make dev-server`. 
+
+For production deployments, we could use something like Docker Swarm or any host with Docker installed. The compose file would point to a pre-built docker image for the application. The docker-compose file provided is only for development.
+
+### Jar 
+
+* Ensure you have JDK8 nstalled
+* Clone the repo
+* Execute `java -jar fortnight.jar` from your terminal
 
 # Design
 
@@ -62,3 +75,7 @@ messages-buffer for user 2:
 ```
 
 Because the cursor is monotonic and is only mutated by a single processor thread, this protocol works reasonably well to ensure that each user sends the correct messages in order.
+
+## Testing
+
+I wanted to use Clojure 1.9 Alpha for this project to do some generative testing using the new spec utilities, but due to a very restrictive schedule I didn't find the time. I manually tested with the client provided, varying the seed and concurrency but chose not to invest any more time in the project as I had gone over the alloted time limit and needed to move on. Total time on this project was around 8-10 hours, mostly on a flight and some clean up over MLK weekend.

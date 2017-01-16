@@ -1,3 +1,4 @@
+version: '2'
 services:
   fortnight:
     build:
@@ -5,3 +6,4 @@ services:
     image: fortnight
     ports:
       - "9090:9090"
+      - "9099:9099"
