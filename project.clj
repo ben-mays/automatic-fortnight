@@ -1,7 +1,7 @@
 (defproject fortnight "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0-alpha10"]
-                 ;; [org.clojure/core.async "0.2.395"]
-                 [org.clojure/test.check "0.9.0"]] ;; for generative testing :D
+                 [org.clojure/tools.logging "0.3.1"]
+                 [log4j/log4j "1.2.16"]]
 
   :source-paths ["src"]
 

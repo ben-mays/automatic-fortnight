@@ -85,7 +85,8 @@
             timeout    (:event-timeout-ms config)]
         (if (is-next? next-event)
           (process-event (buffer/pop-event))
-          (do
-            (log/infof "[event-processor] Cursor encounted a hole at %d waiting %d ms." next-event timeout)
-            (Thread/sleep timeout)
-            (jump-cursor next-event)))))))
+          (if (< 0 timeout)
+            (do
+              (log/infof "[event-processor] Cursor encounted a hole at %d waiting %d ms." next-event timeout)
+              (Thread/sleep timeout)
+              (jump-cursor next-event))))))))

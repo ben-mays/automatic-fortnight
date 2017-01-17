@@ -4,19 +4,19 @@ The Fortnight service is a simple event multiplexing system that exposes a two i
 
 ## Usage
 
-The system exposes the following options:
+The system exposes the following options as env vars:
 
-* Max Event Source Clients
-* Event Source port
-* Max User Clients
-* User client port
-* Max Delay (if -1 wait forever)
+* `maxEventSourceClients` - the maximum number of event source clients. Default: 1
+* `eventSourceServerPort` - the port to listen on for the event source client connections. Default: 9090
+* `maxUserClients` - the maximum number of concurrent user clients that can connect to the server. Default: 1000
+* `userServerPort` - the port to listen on for new user connections. Default: 9099
+* `eventTimeoutMs` - the time in milliseconds to wait before skipping an event. If set to a negative number, the system will block for every event. Default: 1000
 
 ### Docker
 
 I decided to dockerize the service for ease of deployment - the docker container will abstract away the environment. Optionally, I've incuded a jar you can run under `bin`.
 
-* Install (docker-compose)[https://docs.docker.com/compose/install/] (and docker) on your system.
+* Install [docker-compose](https://docs.docker.com/compose/install/) (and docker) on your system.
 * Clone the repo
 * Launch the server with `make dev-server`. 
 
@@ -35,7 +35,7 @@ The design is rather simple. The initial thinking about ordering an infinite of 
 There are 3 abstract components in the service:
 
 * The event source handler - listens on the `port` and handles incoming event source socket connections. On a new connection, a thread is launched that parses incoming events into a shared event-buffer (implemented as a priority queue / min heap).
-* The user handler - listens on the `port` and handles incoming user client socket connections. On a new connection, a thread is launched which will register the user client, listen for events from the event processor and sends them to the user.
+* The user handler - listens on the `port` and handles incoming user client socket connections. On a new connection, a thread is launched which will register the user client. Sending messages to the user socket occurs via the event processor thread.
 * The event processor - Pulls events out of the event-buffer in-order and fans them out into user threads. The event buffer maintains a cursor that indicates the next event to send, allowing events to be placed into the event-buffer in an un-ordered and un-sequential fashion. The event processor will only send the next event if it's sequence number matches the cursor _or_ the maximum event delay has been exceeded.
 
 There are some very obvious limitations and improvements that can be made given more investment:
