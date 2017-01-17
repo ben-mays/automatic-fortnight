@@ -87,6 +87,6 @@
           (process-event (buffer/pop-event))
           (if (< 0 timeout)
             (do
-              (log/infof "[event-processor] Cursor encounted a hole at %d waiting %d ms." next-event timeout)
+              (log/infof "[event-processor] Cursor encounted a hole at %d waiting %d ms. Event buffer on %d" next-event timeout (:seq-num (buffer/peek-event)))
               (Thread/sleep timeout)
               (jump-cursor next-event))))))))

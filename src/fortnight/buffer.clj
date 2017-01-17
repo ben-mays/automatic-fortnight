@@ -1,8 +1,13 @@
-(ns fortnight.buffer)
+(ns fortnight.buffer
+  (:require [clojure.tools.logging :as log]))
 
 (def event-comparator
   (comparator (fn [a b]
-                (< (:seq-num a) (:seq-num b)))))
+                (cond
+                  (and (nil? a) (nil? b)) 0
+                  (nil? a)                -1
+                  (nil? b)                1
+                  :else                   (< (:seq-num a) (:seq-num b))))))
 
 (defn min-heap
   [init-cap comparator]
@@ -27,7 +32,9 @@
 
 (defn push-event
   [event]
-  (.add @events event))
+  (log/infof "[push-event] %s" event)
+  (if-not (nil? event)
+    (.add @events event)))
 
 (defn pop-event
   []
