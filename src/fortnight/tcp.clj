@@ -47,9 +47,9 @@
   (while (open? socket)
     (try
       (let [conn (.accept socket)]
-        (log/info "server-socket-listener" "New connection!")
+        (log/infof "[server-socket-listener] New connection!")
         (-> (fn [] (handler conn))
             (Thread.)
             (.start)))
       (catch SocketException e
-        (log/error "server-socket-listener" (.getMessage e)))))) ;; throw away bad incoming socket connections or be resilient to max-conn issues
+        (log/error "server-socket-listener" e))))) ;; throw away bad incoming socket connections or be resilient to max-conn issues

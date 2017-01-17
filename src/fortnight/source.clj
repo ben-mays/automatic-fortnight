@@ -1,9 +1,10 @@
 (ns fortnight.source
   (:require [fortnight.tcp :as tcp]
-            [fortnight.buffer :as buffer]))
+            [fortnight.buffer :as buffer]
+            [clojure.tools.logging :as log]))
 
-(defn parse-event 
-  "Parses a raw event into a map." 
+(defn parse-event
+  "Parses a raw event into a map."
   [line]
   (let [arr (clojure.string/split line #"\|")]
     {:seq-num (Long/parseLong (first arr))
@@ -17,10 +18,10 @@
   [conn]
   (with-open [reader (tcp/conn->reader conn)]
     (while true
-      (if-let [inp     (.readLine reader)
-               event   (parse-event inp)
+      (if-let [inp (.readLine reader)]
+        (let  [event   (parse-event inp)
                seq-num (:seq-num event)]
         (if (<= (buffer/get-cursor) seq-num)
           (buffer/push-event (parse-event inp))
-          (log/warn "handle-new-event-source" (str "discarding " seq-num)))))))
+          (log/warnf "[handle-new-event-source] Discarding %d!" seq-num)))))))
 

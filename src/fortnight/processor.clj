@@ -24,7 +24,7 @@
 (defn follow
   [event]
   (let [followed      (:to event)
-        followed-conn (get-in (users/get-clients) [followed :conn])
+        followed-conn (users/user->conn followed)
         follower      (:from event)]
     (swap! maze follow-swap-fn follower followed)
     (users/send-message (:raw event) [followed-conn])))
@@ -43,7 +43,7 @@
 (defn private-message
   [event]
   (let [to      (:to event)
-        to-conn (get-in (users/get-clients) [to :conn])]
+        to-conn (users/user->conn to)]
     (if (not (nil? to-conn))
       (users/send-message (:raw event) [to-conn]))))
 
@@ -52,12 +52,11 @@
   (let [from           (:from event)
         follower-conns (->> (get-followers from)
                             (map users/user->conn))]
-    (log/info "status-update" (str from "->" (get-followers from)))
     (users/send-message (:raw event) follower-conns)))
 
 (defn process-event
   [event]
-  (println "Processing " event)
+  (log/infof "[process-event] %s" event)
   (condp = (:type event)
     "F" (follow event) ;; update the client atom for the `to` user with the `from` user id and send a message to `to` user
     "U" (unfollow event)
@@ -70,15 +69,23 @@
   [seq-num]
   (= seq-num (:seq-num (buffer/peek-event))))
 
+(defn jump-cursor
+  [timed-out-event]
+  (if-not (is-next? timed-out-event)
+    (do
+      (buffer/inc-cursor)
+      (log/infof "[jump-cursor] New cursor position %d!" (buffer/get-cursor)))
+    (log/infof "[jump-cursor] Cursor caught up to %d!" timed-out-event)))
+
 (defn event-processor
-  []
+  [config]
   (while true
     (if (buffer/event-buffer-ready?)
-      (do
-        (if (is-next? (buffer/get-cursor))
+      (let [next-event (buffer/get-cursor)
+            timeout    (:event-timeout-ms config)]
+        (if (is-next? next-event)
           (process-event (buffer/pop-event))
-          ;;(do
-            ;;(println "cursor is behind")
-          ;;  (Thread/sleep 100))))
-      ;;(println "no events")
-)))))
+          (do
+            (log/infof "[event-processor] Cursor encounted a hole at %d waiting %d ms." next-event timeout)
+            (Thread/sleep timeout)
+            (jump-cursor next-event)))))))
