@@ -1,42 +1,42 @@
 (ns fortnight.buffer)
 
-;; cursor is the next event id to process, the events should be an ordered collection
-;;(def event-buffer (atom {:cursor 0 :events []}))
-(def ^:private events (atom []))
-(def ^:private cursor (atom 1))
+(def event-comparator
+  (comparator (fn [a b]
+                (< (:seq-num a) (:seq-num b)))))
+
+(defn min-heap
+  [init-cap comparator]
+  (java.util.PriorityQueue. init-cap comparator))
+
+(def events (atom (min-heap 11 event-comparator)))
+(def cursor (atom 1))
 
 (defn reset-state!
   "Helper function for managing local namespace state."
   []
-  (reset! events [])
+  (reset! events (min-heap 11 event-comparator))
   (reset! cursor 1))
 
-(defn get-cursor 
+(defn get-cursor
   []
   @cursor)
 
-(defn inc-cursor 
+(defn inc-cursor
   []
   (swap! cursor inc))
 
 (defn push-event
   [event]
-  ;; hack to sort the event buffer on each push
-  (swap! events (fn [buffer event] (sort-by :seq-num (conj buffer event))) event))
+  (.add @events event))
 
 (defn pop-event
   []
-  (locking @events
-    (let [event (first @events)]
-      (swap! events rest)
-      event)))
+  (.poll @events))
 
 (defn peek-event
   []
-  (first @events))
+  (.peek @events))
 
 (defn event-buffer-ready?
   []
-  (not (empty? @events)))
-
-;; TODO: impl prio queue
+  (not (= (.size @events) 0)))

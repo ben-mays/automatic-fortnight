@@ -65,8 +65,6 @@
   (reset! user-server (start-user-server config))
   (reset! event-processor (start-event-processor config)))
 
-
-
 (defn get-env-var
   ([key default] (get-env-var key default int))
   ([key default coerce-fn]
@@ -81,8 +79,6 @@
                 :max-event-source-clients (get-env-var "maxEventSourceClients" 1)
                 :event-source-server-port (get-env-var "eventSourceServerPort" 9090)
                 :max-user-clients         (get-env-var "maxUserClients" 1000)
-                :user-server-port         (get-env-var "userServerPort" 9099)}
-        ]
-    ;; init logging
+                :user-server-port         (get-env-var "userServerPort" 9099)}]
     ;; start servers
     (start config)))
