@@ -107,6 +107,10 @@ public final class FibonacciHeap<T> {
             return mPriority;
         }
 
+        public String toString() {
+            return mElem.toString();
+        }
+
         /**
          * Constructs a new Entry that holds the given element with the indicated 
          * priority.
@@ -231,7 +235,7 @@ public final class FibonacciHeap<T> {
         /* Check for whether we're empty. */
         if (isEmpty())
             return null;
-        
+
         /* Otherwise, we're about to lose an element, so decrement the number of
          * entries in this heap.
          */
