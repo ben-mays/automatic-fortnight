@@ -4,6 +4,7 @@
                  [log4j/log4j "1.2.16"]]
 
   :source-paths ["src"]
+  :java-source-paths ["java"]
 
   :profiles {:uberjar {:aot :all}}
 

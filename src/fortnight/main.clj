@@ -2,7 +2,6 @@
   (:gen-class)
   (:require [fortnight.tcp :as tcp]
             [fortnight.source :as source]
-            [fortnight.processor :as processor]
             [fortnight.buffer :as buffer]
             [fortnight.users :as users]
             [clojure.tools.logging :as log]))
@@ -25,13 +24,6 @@
      :max-conn max-conn
      :socket   socket
      :listener listener}))
-
-(defn start-event-processor
-  [config]
-  (let [thread (Thread. #(processor/event-processor config))]
-    (.start thread)
-    (log/infof "[start-event-processor] Event processor thread started!")
-    thread))
 
 (defn start-user-server
   [config]
@@ -62,8 +54,7 @@
   (users/reset-state!)
   (buffer/reset-state!)
   (reset! event-server (start-event-source-server config))
-  (reset! user-server (start-user-server config))
-  (reset! event-processor (start-event-processor config)))
+  (reset! user-server (start-user-server config)))
 
 (defn get-env-var
   ([key default] (get-env-var key default int))
@@ -75,7 +66,7 @@
 (defn -main
   [& args]
   ;; load config
-  (let [config {:event-timeout-ms         (get-env-var "eventTimeoutMs" 1000)
+  (let [config {:event-timeout-ms         (get-env-var "eventTimeoutMs" 100)
                 :max-event-source-clients (get-env-var "maxEventSourceClients" 1)
                 :event-source-server-port (get-env-var "eventSourceServerPort" 9090)
                 :max-user-clients         (get-env-var "maxUserClients" 1000)
