@@ -65,8 +65,13 @@
   (reset! user-server (start-user-server config))
   (reset! event-processor (start-event-processor config)))
 
+
+(defn str->int
+  [s]
+  (Integer/parseInt s))
+
 (defn get-env-var
-  ([key default] (get-env-var key default int))
+  ([key default] (get-env-var key default str->int))
   ([key default coerce-fn]
    (if-let [val (System/getenv key)]
     (coerce-fn val)
