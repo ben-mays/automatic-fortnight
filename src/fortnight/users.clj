@@ -23,7 +23,7 @@
     (let [writer (tcp/conn->writer conn)]
       (.write writer (str msg "\r\n"))
       (.flush writer))
-    (log/infof "[write] %s" msg)
+    (log/debugf "[write] %s" msg)
     (catch SocketException e
       (log/error "[write]" e))))
 
@@ -33,7 +33,7 @@
   (let [valid-conns (->> conns
                          (filter some?) ;; filter nil connections
                          (filter #(tcp/open? %)))] ;; filter out closed sockets
-    (dorun (map (fn [conn] (write msg conn)) valid-conns))))
+    (dorun (pmap (fn [conn] (write msg conn)) valid-conns))))
 
 (defn handle-new-clients
   "Reads the user id from the connection and stores the socket in the clients atom."

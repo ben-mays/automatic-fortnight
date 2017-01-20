@@ -14,7 +14,7 @@
      :raw     line}))
 
 (defn handle-new-event-source
-  "Continually reads from the given connection and appends each new line to the event-buffer."
+  "Continually reads from the given connection and appends each new line to the event-buffer. Will discard previously seen events."
   [conn]
   (with-open [reader (tcp/conn->reader conn)]
     (while true
