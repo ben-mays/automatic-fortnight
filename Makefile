@@ -2,7 +2,7 @@
 
 .PHONY: help
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo "Fortnight:\n\tdev-server: Builds the fortnight docker image and launches the docker container.\n\tdev-server-clean: Cleans up the docker images and containers for the fortnight project."	
 
 .PHONY: dev-server
 dev-server: dev-server-clean

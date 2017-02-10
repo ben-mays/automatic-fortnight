@@ -1,44 +1,7 @@
 (ns fortnight.source
   (:require [fortnight.tcp :as tcp]
-            [fortnight.users :as users]
+            [fortnight.buffer :as buffer]
             [clojure.tools.logging :as log]))
-
-(defn follow
-  [event]
-  (let [followed      (:to event)
-        follower      (:from event)]
-    (users/enqueue-message followed event)))
-
-(defn unfollow
-  [event]
-  (let [followed (:to event)
-        follower (:from event)]
-    (users/enqueue-message followed event)))
-
-(defn broadcast
-  [event]
-  (users/enqueue-message (keys (users/get-clients)) event))
-
-(defn private-message
-  [event]
-  (users/enqueue-message (:to event) event))
-
-(defn status-update
-  [event]
-  ;; the user handler will spawn the other events when it's processed.
-  (users/enqueue-message (:from event) event))
-
-(defn process-event
-  [event]
-  ;;(log/infof "[process-event] %s" event)
-  (condp = (:type event)
-    "F" (follow event) ;; update the client atom for the `to` user with the `from` user id and send a message to `to` user
-    "U" (unfollow event)
-    "B" (broadcast event)
-    "P" (private-message event)
-    "S" (status-update event))
-  (users/conj-seen (:seq-num event))
-  #_(users/update-cursor))
 
 (defn parse-event
   "Parses a raw event into a map."
@@ -51,10 +14,14 @@
      :raw     line}))
 
 (defn handle-new-event-source
-  "Continually reads from the given connection and processes events."
+  "Continually reads from the given connection and appends each new line to the event-buffer. Will discard previously seen events."
   [conn]
   (with-open [reader (tcp/conn->reader conn)]
     (while true
       (if-let [inp (.readLine reader)]
-        (let  [event   (parse-event inp)]
-          (process-event event))))))
+        (let  [event   (parse-event inp)
+               seq-num (:seq-num event)]
+        (if (<= (buffer/get-cursor) seq-num)
+          (buffer/push-event (parse-event inp))
+          (log/warnf "[handle-new-event-source] Discarding %d!" seq-num)))))))
+
